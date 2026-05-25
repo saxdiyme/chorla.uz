@@ -6,13 +6,36 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import AuctionCard from "@/components/AuctionCard";
 import {
-  categories, trendingChips, trending, auctions, slashed,
-  recommended, reviews,
+  categories as fallbackCategories,
+  trendingChips,
+  trending as fallbackTrending,
+  auctions as fallbackAuctions,
+  slashed as fallbackSlashed,
+  recommended,
+  reviews,
 } from "@/lib/data";
+import {
+  getCategories,
+  getTrendingListings,
+  getActiveAuctions,
+  getSlashedListings,
+} from "@/lib/queries";
 
 const ICONS = { Tag, Home, Building2, Car, Smartphone, Shirt, ShoppingBag, Gem };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [dbCategories, dbTrending, dbAuctions, dbSlashed] = await Promise.all([
+    getCategories(),
+    getTrendingListings(),
+    getActiveAuctions(),
+    getSlashedListings(),
+  ]);
+
+  const categories = dbCategories.length ? dbCategories : fallbackCategories;
+  const trending = dbTrending.length ? dbTrending : fallbackTrending;
+  const auctions = dbAuctions.length ? dbAuctions : fallbackAuctions;
+  const slashed = dbSlashed.length ? dbSlashed : fallbackSlashed;
+
   return (
     <>
       <Navbar />
@@ -42,13 +65,13 @@ export default function HomePage() {
         <section className="section">
           <div className="section-head">
             <h2>Nimani qidiryapsiz?</h2>
-            <a className="section-link" href="/categories">Barcha kategoriyalar →</a>
+            <a className="section-link" href="/browse">Barcha kategoriyalar →</a>
           </div>
           <div className="cats">
             {categories.map((c) => {
               const Icon = ICONS[c.icon];
               return (
-                <a key={c.name} className="cat" href="/browse">
+                <a key={c.name} className="cat" href={c.slug ? `/browse?category=${c.slug}` : '/browse'}>
                   <span className="cat-icon" style={{ background: c.color }}>
                     <Icon size={24} />
                   </span>
@@ -63,7 +86,7 @@ export default function HomePage() {
         <section className="section">
           <div className="section-head">
             <h2>Hozir mashhur</h2>
-            <a className="section-link" href="/trending">Barchasini ko'rish →</a>
+            <a className="section-link" href="/browse?sort=popular">Barchasini ko'rish →</a>
           </div>
           <div className="chips" style={{ marginBottom: 16 }}>
             {trendingChips.map((c) => (
@@ -94,7 +117,7 @@ export default function HomePage() {
         <section className="section">
           <div className="section-head">
             <h2>Chegirmali narxlar</h2>
-            <a className="section-link" href="/deals">Barchasini ko'rish →</a>
+            <a className="section-link" href="/browse?condition=new">Barchasini ko'rish →</a>
           </div>
           <div className="grid">
             {slashed.map((item) => (
