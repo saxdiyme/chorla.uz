@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
 import { formatPrice, timeAgo } from '@/lib/utils';
 import { condLabels } from '@/lib/data';
@@ -29,11 +30,13 @@ export default async function ListingPage({ params }) {
       {listing.images && listing.images.length > 0 ? (
         <div style={{ display: 'flex', gap: 12, overflowX: 'auto', marginBottom: 24 }}>
           {listing.images.map((url, i) => (
-            <img
+            <Image
               key={i}
               src={url}
               alt={listing.title}
-              style={{ height: 320, minWidth: 280, objectFit: 'cover', borderRadius: 12, flexShrink: 0 }}
+              width={600}
+              height={400}
+              style={{ objectFit: 'cover', borderRadius: 8 }}
             />
           ))}
         </div>
